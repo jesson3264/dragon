@@ -3,14 +3,12 @@
 #include <cstdio>
 #include <memory>
 #include <string>
-
+#include "builtin.h"
 namespace dragon {
 namespace evaluator {
 
 #define TRUE_OBJ  std::make_shared<object::Boolean>(true)
 #define FALSE_OBJ std::make_shared<object::Boolean>(false)
-
-
 
 std::shared_ptr<object::Object> Evaluator::eval(const std::shared_ptr<ast::Node>& node,
                                       const std::shared_ptr<Environment>& env) {
@@ -109,12 +107,6 @@ std::shared_ptr<object::Object> Evaluator::eval(const std::shared_ptr<ast::Node>
 
         return evalIndexExpression(left, idx);
     }
-    // hash
-    if (auto h = std::dynamic_pointer_cast<ast::HashLiteral>(node)) {
-        // TODO evalHashLiteral
-    }
-
-    // TODO 内置函数
     return nullptr;
 }
 
@@ -224,7 +216,6 @@ std::shared_ptr<object::Object> Evaluator::evalPrefixExpression(const std::strin
     return newError("unknown operator: %s%s", op.c_str(), dragon::object::GetTypeString(right->Type()).c_str());
 }
 
-// TODO
 std::shared_ptr<object::Object> Evaluator::evalInfixExpression(const std::string& op,
                                                      const std::shared_ptr<object::Object>& left,
                                                      const std::shared_ptr<object::Object>& right) {
@@ -349,10 +340,16 @@ std::shared_ptr<object::Object> Evaluator::evalHashLiteral(const std::shared_ptr
 std::shared_ptr<object::Object> Evaluator::evalIdentifier(const std::shared_ptr<ast::Identifier>& node,
                                                 const std::shared_ptr<Environment>& env) {
     auto val = env->get(node->value_);
-    if (!val.first) {
-        return newError(string("identifier not found: " + node->value_).c_str());
+    if (val.first) {
+        return val.first;
     }
-    return val.first;
+
+    auto b = FindBuiltInFunc(node->value_);
+    if (b != nullptr) {
+        return  b;
+    }
+    // 查找确认是否是内置类型
+    return newError(string("identifier not found: " + node->value_).c_str());
 }
 
 std::vector<std::shared_ptr<object::Object>> Evaluator::evalExpressions(
@@ -374,13 +371,18 @@ std::vector<std::shared_ptr<object::Object>> Evaluator::evalExpressions(
 std::shared_ptr<object::Object> Evaluator::applyFunction(const std::shared_ptr<object::Object>& fn,
                                                const std::vector<std::shared_ptr<object::Object>>& args) {
     auto function = std::dynamic_pointer_cast<object::Function>(fn);
-    if (!function) {
-        return newError("not a function: %s",dragon::object::GetTypeString(fn->Type()).c_str() );
+
+    if (function) {
+        auto extendedEnv = extendFunctionEnv(function, args);
+        auto evaluated = eval(function->body_, extendedEnv);
+        return unwrapReturnValue(evaluated);
     }
-    
-    auto extendedEnv = extendFunctionEnv(function, args);
-    auto evaluated = eval(function->body_, extendedEnv);
-    return unwrapReturnValue(evaluated);
+    else { // 判断是不是内置的函数
+        auto builtin = std::dynamic_pointer_cast<object::Builtin>(fn);
+        return builtin->fn_(args);
+    }
+
+    return newError("not a function: %s",dragon::object::GetTypeString(fn->Type()).c_str() );
 }
 
 std::shared_ptr<Environment> Evaluator::extendFunctionEnv(
@@ -389,7 +391,7 @@ std::shared_ptr<Environment> Evaluator::extendFunctionEnv(
     auto env = Environment::newEnclosedEnvironment(fn->env_);
     
     for (size_t i = 0; i < fn->parameters_.size(); ++i) {
-        env->set(fn->parameters_[i]->value_, args[i]); // TODO 这里有点疑问
+        env->set(fn->parameters_[i]->value_, args[i]); //
     }
     
     return env;

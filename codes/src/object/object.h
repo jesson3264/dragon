@@ -6,7 +6,8 @@
 #include <string>
 
 namespace dragon {
-namespace object {  
+namespace object {
+
 class Object {
 public:
     enum class ObjectType {
@@ -29,6 +30,8 @@ public:
     virtual ObjectType Type() const = 0;
     virtual std::string Inspect() const = 0;
 };
+
+using BuiltinFunction = std::function<std::shared_ptr<Object>(const std::vector<std::shared_ptr<Object>>&)>;
 
 class HashKey {
 public:
@@ -151,6 +154,20 @@ public:
 };
 
 // 内置函数
+class Builtin : public Object {
+public:
+    BuiltinFunction fn_;
+
+public:
+    Builtin(BuiltinFunction f): fn_(f){};
+    ObjectType Type() const override {
+        return ObjectType::BUILTIN_OBJ;
+    }
+
+    string Inspect() const override {
+        return "builtin function";
+    }
+};
 
 // 数组对象
 class Array :public Object {

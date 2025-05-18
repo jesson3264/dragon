@@ -147,7 +147,6 @@ bool testNullObject(TestingT& t, dragon::object::Object *o) {
     return true;
 }
 
-
 void TestIfElseExpressions(TestingT &t) {
     struct TestCase {
         string input;
@@ -391,14 +390,14 @@ void TestEnclosingEnvironments(TestingT& t)
 }
 
 void TestClosures(TestingT &t) {
-    string intput = R"(let newAdder = fn(x) {
+    string input = R"(let newAdder = fn(x) {
   fn(y) { x + y };
 };
 
 let addTwo = newAdder(2);
 addTwo(2);)";
 
-    std::shared_ptr<dragon::object::Object> evaluated = testEval(intput);
+    std::shared_ptr<dragon::object::Object> evaluated = testEval(input);
     testIntegerObject(t, evaluated.get(), 4);
 }
 
@@ -415,6 +414,51 @@ void TestStringLiteral(TestingT &t) {
     }
 }
 
+// 测试字符串拼接
+void TestStringConcatenation(TestingT &t)
+{
+    string input = R"("Hello" + " " + "World!")";
+    std::shared_ptr<dragon::object::Object> evaluated = testEval(input);
+    if (!evaluated) {
+        t.Fatalf("");
+    }
+
+    auto str = dynamic_cast<dragon::object::String*>(evaluated.get());
+
+    if (!str) {
+        t.Fatalf("");
+        if (str->Value != "Hello World!") {
+            t.Fatalf("");
+        }
+    }
+}
+
+// 测试内置函数
+void TestBuiltinFunctions(TestingT &t) {
+    struct TestCase {
+        string input;
+        int expected;
+    };
+
+    std::vector<TestCase> testcases = {
+            {R"(len(""))", 0},
+//            {R"(len("123"))", 3},
+//            {R"(puts("123"))", Value()},
+    };
+
+    for (const auto &tc : testcases) {
+        std::shared_ptr<dragon::object::Object> evaluated = testEval(tc.input);
+        if (!evaluated) {
+            t.Fatalf("");
+        }
+//        auto* integer = dynamic_cast<dragon::object::Integer*>(evaluated.get());
+        testIntegerObject(t, evaluated.get(), tc.expected);
+    }
+
+    string input = R"(print("123"))";
+    testEval(input);
+
+}
 void TestEvals()
 {
 	TestingT t;
@@ -430,4 +474,6 @@ void TestEvals()
     TestEnclosingEnvironments(t);
     TestClosures(t);
     TestStringLiteral(t);
+    TestStringConcatenation(t);
+    TestBuiltinFunctions(t);
 }

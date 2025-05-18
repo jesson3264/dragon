@@ -20,7 +20,7 @@ Repl::Repl()
 
 }
 const std::string PROMPT = ">> ";
-const std::string MONKEY_FACE = R"(
+const std::string DRAGON_FACE = R"(
                        ZZ    ZZZ     Z Z     ZZ   ZZ
                     Z ZZZ  ZZZ  ZZZ ZZZ     ZZZ
                   ZZZZZZZZZZZZZZZZZZZZ     ZZ  Z
@@ -69,7 +69,7 @@ Z  ZZ  ZZ   ZZZZZZZZZZZ      ZZZ  Z
                                                              ZZZ
 )";
 void printParserErrors(std::ostream& out, const std::vector<std::string>& errors) {
-        out << MONKEY_FACE;
+        out << DRAGON_FACE;
         out << "Woops! We ran into some dragon business here!\n";
         out << " parser errors:\n";
         for (const auto& msg : errors) {

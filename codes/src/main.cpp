@@ -27,6 +27,13 @@ void Test() {
 //    repl::Repl r;
 //    r.Start(std::cin, std::cout);
 }
+
+void Repl()
+{
+    repl::Repl r;
+    r.Start(std::cin, std::cout);
+}
+
 int main(int argc, char **argv)
 {
     if (argc > 1) {
@@ -37,8 +44,9 @@ int main(int argc, char **argv)
         if (string(argv[1]) == "-v") {
             cout << Version << endl;
         }
+    } else if (argc == 1) {
+        Repl();
     }
-
 
 	return 0;
 }

@@ -42,7 +42,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/evaluator)
 include_directories(${CMAKE_SOURCE_DIR}/src/util)
 
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} src/evaluator/builtin.cpp src/evaluator/builtin.h)
 
 # 包含所有子目录头文件
 target_include_directories(${PROJECT_NAME} PRIVATE

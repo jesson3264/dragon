@@ -16,7 +16,7 @@ public:
     static std::shared_ptr<object::Object> eval(const std::shared_ptr<ast::Node>& node, 
                                       const std::shared_ptr<Environment>& env);
 
-private:
+public:
     static std::shared_ptr<object::Object> evalProgram(const std::shared_ptr<ast::Program>& program,
                                              const std::shared_ptr<Environment>& env);
     
@@ -41,6 +41,8 @@ private:
     
     static std::shared_ptr<object::Object> evalIdentifier(const std::shared_ptr<ast::Identifier>& node,
                                                 const std::shared_ptr<Environment>& env);
+    static std::shared_ptr<object::Object> evalHashLiteral(const std::shared_ptr<ast::HashLiteral>& ie,
+                                                           const std::shared_ptr<Environment>& env);
 
     static std::shared_ptr<object::Object> evalArrayIndexExpression(const std::shared_ptr<object::Object> &array,
                                                                     const std::shared_ptr<object::Object> &index);
@@ -49,8 +51,7 @@ private:
     static std::shared_ptr<object::Object> evalIndexExpression(std::shared_ptr<object::Object>  &obj,
                                                                    const std::shared_ptr<object::Object>&node);
 
-    static std::shared_ptr<object::Object> evalHashLiteral(const std::shared_ptr<ast::HashLiteral>& ie,
-                                                            const std::shared_ptr<Environment>& env);
+
     static std::vector<std::shared_ptr<object::Object>> evalExpressions(
         const std::vector<std::shared_ptr<ast::Expression>>& exps,
         const std::shared_ptr<Environment>& env);
